@@ -3,6 +3,7 @@
 **Numbers about streams you cannot hold in RAM.**
 
 <p>
+  <a href="https://github.com/fj-8/sift/actions/workflows/ci.yml"><img src="https://github.com/fj-8/sift/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="#license"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue" alt="License: MIT OR Apache-2.0"></a>
   <img src="https://img.shields.io/badge/dependencies-0-informational" alt="Zero dependencies">
   <img src="https://img.shields.io/badge/python-3.11%2B-orange" alt="Python 3.11+">
@@ -324,9 +325,11 @@ is a test or a measurement, and no fabricated performance. Architecture in
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), the maths and citations in
 [`docs/ALGORITHMS.md`](docs/ALGORITHMS.md).
 
-There is no CI workflow yet — the repository settings do not currently allow
-pushing `.github/workflows`, so the commands above are what verification means
-here.
+`.github/workflows/ci.yml` runs the same `unittest discover` across Python
+3.11, 3.12 and 3.13 on ubuntu-latest and windows-latest, then `pip install .`
+and a smoke run of both entry points (`sift --version`, `python -m sift
+--help`). All twelve jobs were green on the commit that added the workflow;
+before it existed, every number here came from the Windows runs above.
 
 ## Elsewhere in this account
 
