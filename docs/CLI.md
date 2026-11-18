@@ -18,7 +18,7 @@ id,user,latency_ms
 | `--column N` | all | use field *N* (1-based) of each row instead of the whole line |
 | `--separator S` | all | split on *S* rather than on whitespace |
 | `--skip-bad` | all | ignore rows the column or the number parser cannot use |
-| `files …` | all | read stdin when empty |
+| `files …` | all | read stdin when empty, or when the name is `-` |
 
 `sift` is strict by default, and that is the behaviour you want when a
 measurement is going into a report:
@@ -133,13 +133,18 @@ $ sift sample --seed 7 3 events.csv
 Reservoir sampling: uniform over the lines, `k` held, no seek. The `# kept …`
 line goes to stderr so stdout stays pipeable.
 
-Python 3.11's `argparse` cannot resume a variadic positional after an option,
-so options go **before** `k` and the file names:
+`k` is the first thing after the subcommand; the file names follow it, and
+options may sit on either side:
 
 ```console
-$ sift sample 20 --seed 7 events.csv     # error: unrecognized arguments
-$ sift sample --seed 7 20 events.csv     # works
+$ sift sample 3 --seed 7 events.csv
+$ sift sample --seed 7 3 events.csv          # same draw
 ```
+
+`sift` reorders `sample`'s arguments before handing them to `argparse`, because
+Python 3.11 will not resume a variadic positional once an option has intervened
+(`tests/test_cli.py::TestSample::test_an_option_between_k_and_the_file_works_too`
+pins that both spellings give the identical draw).
 
 ## Composition
 

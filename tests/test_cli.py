@@ -301,12 +301,16 @@ class TestSample(Fixture):
         _, other, _ = run(["sample", "--seed", "100", "15", self.path])
         self.assertNotEqual(first, other)
 
-    def test_an_option_between_k_and_the_file_is_an_argument_error(self) -> None:
-        # Python 3.11 argparse cannot resume a variadic positional after an
-        # option, so this ordering is rejected rather than silently misread.
-        code, _, err = run(["sample", "20", "--seed", "7", self.path])
-        self.assertEqual(code, 2)
-        self.assertIn("unrecognized arguments", err)
+    def test_an_option_between_k_and_the_file_works_too(self) -> None:
+        # Python 3.11's argparse will not resume a variadic positional after an
+        # option, so main() reorders argv for `sample`. Both spellings have to
+        # give the same draw, or the reorder is misfiring.
+        code, after, err = run(["sample", "20", "--seed", "7", self.path])
+        self.assertEqual(code, 0, err)
+        same, before, _ = run(["sample", "--seed", "7", "20", self.path])
+        self.assertEqual(same, 0)
+        self.assertEqual(after.splitlines(), before.splitlines())
+        self.assertEqual(len(after.splitlines()), 20)
 
     def test_without_a_seed_it_still_samples(self) -> None:
         code, out, err = run(["sample", "5", self.path])
@@ -343,6 +347,17 @@ class TestStdinAndMultipleFiles(Fixture):
                 code = cli.main(["cardinality"])
         self.assertEqual(code, 0, err.getvalue())
         self.assertIn("rows            4", out.getvalue())
+
+    def test_dash_names_stdin(self) -> None:
+        """`sift stats -` is the conventional way to say "the pipe"."""
+        buffer = io.StringIO("10\n20\n30\n")
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            with mock.patch("sys.stdin", buffer):
+                code = cli.main(["stats", "-"])
+        self.assertEqual(code, 0, err.getvalue())
+        self.assertIn("count   3", out.getvalue())
+        self.assertIn("mean    20", out.getvalue())
 
     def test_stdin_is_not_closed_by_the_reader(self) -> None:
         """``iter_values`` must not close a stream it does not own."""

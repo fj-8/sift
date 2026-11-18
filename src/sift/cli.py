@@ -37,7 +37,10 @@ def _fields(line: str, separator: str | None) -> list[str]:
 
 def iter_values(args: argparse.Namespace, *, numeric: bool):
     """Yield one item per input line, honouring --column and --skip-bad."""
-    for path in args.files or [""]:
+    for name in args.files or [""]:
+        # "-" is the conventional name for stdin, "" the implicit one; both read
+        # the pipe, and neither is ever closed out from under the caller.
+        path = "" if name == "-" else name
         # nullcontext(sys.stdin) so a pipe is never closed, while a real file is.
         manager = open(path, encoding="utf-8", errors="replace") if path else contextlib.nullcontext(sys.stdin)
         with manager as stream:
@@ -230,9 +233,8 @@ def build_parser() -> argparse.ArgumentParser:
         "sample",
         help="a fair k-subset of the lines",
         description=(
-            "Sample k lines. Put --seed before k and the file names: argparse "
-            "cannot tell an option apart from a second positional once the "
-            "first one has been consumed."
+            "Sample k lines. k comes first, then the file names; options may go "
+            "on either side of them."
         ),
     )
     p_sam.add_argument("count", type=int, help="k")
@@ -242,8 +244,38 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+_SAMPLE_VALUE_OPTS = frozenset({"--column", "--separator", "--seed"})
+
+
+def _reorder_sample(argv: list[str]) -> list[str]:
+    """`sample` takes k and then the files, and Python 3.11's argparse will not
+    resume a variadic positional once an option has intervened, so `sample 5
+    --seed 7 f.csv` dies with "the following arguments are required: files".
+    Move the positionals in front of the options ourselves. An option's value
+    travels with the option, or `--seed 7` becomes a file named "7"."""
+    rest, positionals, options = argv[1:], [], []
+    index = 0
+    while index < len(rest):
+        token = rest[index]
+        if token.startswith("-") and token != "-":
+            options.append(token)
+            if token in _SAMPLE_VALUE_OPTS and index + 1 < len(rest):
+                options.append(rest[index + 1])
+                index += 1
+        else:
+            positionals.append(token)
+        index += 1
+    if not options or not positionals:
+        return argv
+    return [argv[0], *positionals, *options]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
+    if argv is None:
+        argv = sys.argv[1:]
+    if len(argv) > 1 and argv[0] == "sample":
+        argv = _reorder_sample(argv)
     args = parser.parse_args(argv)
     try:
         return args.func(args)

@@ -6,8 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
-- Nothing staged.
+### Fixed
+- `-` is stdin on every subcommand. `sift stats -` used to try to open a file
+  named `-` and exit 2 with `No such file or directory`.
+- `sift sample 20 --seed 7 f.csv` parses. `main()` moves `sample`'s positionals
+  in front of its options, because Python 3.11's argparse will not resume a
+  variadic positional once an option has intervened; `sift sample --seed 7 20
+  f.csv` draws the same lines from the same seed either way, which
+  `tests/test_cli.py` now asserts.
+- The suite is 231 tests.
 
 ## [0.1.0] - 2026-11-18
 
@@ -40,7 +47,8 @@ Initial public release. Pure standard library, Python 3.11+.
 - `sift._hash`: `blake2b(digest_size=16, key=b"sift.v1")` over a tagged
   encoding, so hashing does not depend on `PYTHONHASHSEED` or on the process.
 - `sift` CLI: `cardinality`, `top`, `quantiles`, `stats`, `sample`, reading
-  files or stdin line by line, with `--column`, `--separator`, `--skip-bad`,
+  files or stdin line by line, with `--column`,
+  `--separator`, `--skip-bad`,
   `--precision`, `--items`, `--eps`, `--delta`, `--compression`, `--qs`,
   `--exact`, `--seed`.
 - `bench/bench.py`: seven suites (accuracy, throughput, memory, serialisation,

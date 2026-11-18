@@ -25,7 +25,7 @@ Python 3.11 or newer. There is nothing to install:
 ```console
 $ git clone https://github.com/fj-8/sift && cd sift
 $ PYTHONPATH=src python -m unittest discover -s tests -t .
-Ran 230 tests in 13.4s
+Ran 231 tests in 12.9s
 ```
 
 `src` layout means the package is not importable until you put `src` on the

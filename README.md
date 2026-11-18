@@ -6,7 +6,7 @@
   <a href="#license"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue" alt="License: MIT OR Apache-2.0"></a>
   <img src="https://img.shields.io/badge/dependencies-0-informational" alt="Zero dependencies">
   <img src="https://img.shields.io/badge/python-3.11%2B-orange" alt="Python 3.11+">
-  <img src="https://img.shields.io/badge/tests-230%20passing-brightgreen" alt="230 tests">
+  <img src="https://img.shields.io/badge/tests-231%20passing-brightgreen" alt="231 tests">
   <img src="https://img.shields.io/badge/stdlib-only-green" alt="Standard library only">
 </p>
 
@@ -308,7 +308,7 @@ Not guaranteed, by design:
 
 ```console
 $ PYTHONPATH=src python -m unittest discover -s tests -t .
-Ran 230 tests in 13.4s
+Ran 231 tests in 12.9s
 $ python bench/bench.py --quick        # 15 s sanity pass
 $ python bench/bench.py > bench/bench-full.txt   # the run behind every number
 ```
@@ -317,7 +317,7 @@ $ python bench/bench.py > bench/bench-full.txt   # the run behind every number
 every table in `docs/PERFORMANCE.md` and the README was copied from (seed
 `20251118`, Python 3.11.9, Windows AMD64, 149.8 s).
 
-230 tests, no test dependencies, and one test module per structure plus frames,
+231 tests, no test dependencies, and one test module per structure plus frames,
 CLI, growth bounds and the README examples. [`CONTRIBUTING.md`](CONTRIBUTING.md)
 is three rules: the standard library is the entire dependency list, every claim
 is a test or a measurement, and no fabricated performance. Architecture in
