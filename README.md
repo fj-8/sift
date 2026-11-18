@@ -328,6 +328,17 @@ There is no CI workflow yet — the repository settings do not currently allow
 pushing `.github/workflows`, so the commands above are what verification means
 here.
 
+## Elsewhere in this account
+
+The same rules applied in two other languages — zero dependencies, and every
+number in the README measured in the same checkout:
+
+- [`karg`](https://github.com/fj-8/karg) — dependency-free Rust argument parser
+  with typed accessors and errors that name the nearest valid flag.
+- [`bitlane`](https://github.com/fj-8/bitlane) — header-only C++20 compressed
+  bitmap index over `uint32_t` sets, with a versioned, CRC32C-checked wire
+  format.
+
 ## License
 
 Dual-licensed under [MIT](LICENSE-MIT) and
