@@ -1,0 +1,76 @@
+name: Bug report
+description: An estimate, a frame or a CLI report is wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Half the value of a sift bug report is that the maintainer can paste it
+        into a test. Include the structure's geometry, the stream, and the exact
+        output — "the numbers look off" is not reproducible.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproducer
+      description: |
+        A short script, or the exact `sift` command line. Include sizes
+        (`HyperLogLog(12)`, `CountMinSketch(2048, 4)`, `TDigest(100.0)`) and how
+        many items you fed it.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: |
+        What the documented bound says should happen. If you are comparing to an
+        exact answer, say which one (`statistics.variance`, `len(set(...))`) and
+        paste both numbers.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Full output, including any traceback.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which layer is misbehaving?
+      options:
+        - HyperLogLog
+        - CountMinSketch
+        - TDigest
+        - RunningStats / Ewma
+        - Reservoir
+        - Serialisation (to_bytes / from_bytes)
+        - CLI
+        - Determinism across processes
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: |
+        Output of `python -c "import sys, sift; print(sys.version, sift.__version__)"`
+        and, if you built from source, `git rev-parse --short HEAD`.
+      placeholder: 3.11.9 (tags/v0.1.0) · sift 0.1.0 · Windows AMD64
+    validations:
+      required: true
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I reproduced this against the current `main`.
+          required: true
+        - label: I read the relevant bound in `docs/ALGORITHMS.md` — I know `CountMinSketch.query` is an upper bound and `HyperLogLog.standard_error` is a standard deviation, not a maximum.
+          required: true
+        - label: `PYTHONPATH=src python -m unittest discover -s tests -t .` passes for me, so this is not a broken checkout.
+          required: true

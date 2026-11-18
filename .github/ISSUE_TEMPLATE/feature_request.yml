@@ -1,0 +1,66 @@
+name: Feature request
+description: A structure, an accessor or a CLI flag that does not exist yet
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you write anything: the two constraints that shape this library
+        are **standard library only** and **fixed memory**. A request that needs
+        a dependency or grows with `n` will be answered with "use `pandas`/
+        `redis` for that" — and that is the right answer, not a dismissal.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The question you cannot answer today
+      description: What are you streaming, what do you want to know about it, and what do you currently do instead?
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: The call you would like to write
+      description: A snippet, in the style of the existing API.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: What it should cost
+      description: |
+        Memory and time, as a function of the parameters you would expose. If
+        the answer is "it depends on the data", say so — that is exactly the
+        property that makes a sketch interesting.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of change
+      options:
+        - New structure (needs a paper reference and an accuracy suite row)
+        - New accessor or method on an existing structure
+        - Serialisation for a structure that lacks it
+        - CLI flag or subcommand
+        - Documentation or examples
+        - Build, packaging or test tooling
+    validations:
+      required: true
+  - type: textarea
+    id: prior
+    attributes:
+      label: Prior art
+      description: |
+        Which paper or library does this already? A reference implementation is
+        welcome; a citation is enough to start. sift deliberately re-implements
+        nothing that the standard library already provides.
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Rules acknowledged
+      options:
+        - label: No new dependency, including for tests.
+          required: true
+        - label: Any accuracy claim will need a measured row in `bench/bench.py`, not a quote from a paper.
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/fj-8/sift/security/advisories/new
+    about: A frame that allocates, a structure that grows with n — report privately.
+  - name: Contributing rules
+    url: https://github.com/fj-8/sift/blob/main/CONTRIBUTING.md
+    about: Standard library only, every claim measured, no fabricated performance. Read before you code.
+  - name: The algorithms behind the numbers
+    url: https://github.com/fj-8/sift/blob/main/docs/ALGORITHMS.md
+    about: Most "this is wrong" reports are a misunderstanding of what the bound promises. Check here first.

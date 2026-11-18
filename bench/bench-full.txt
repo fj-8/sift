@@ -1,0 +1,116 @@
+sift 0.1.0 - Python 3.11.9 on Windows AMD64, 2026-11-18 22:23
+
+## accuracy
+
+Error against the exact answer. 'measured' is the error this run observed,'spread' is the second statistic of that measurement, 'bound' the promise.
+
+| structure                          | stream                           | measured               | spread         | bound               | note                                     |
+|------------------------------------|----------------------------------|------------------------|----------------|---------------------|------------------------------------------|
+| HyperLogLog p=8                    | 50,000 distinct                  | +0.10%                 | 11.63%         | 6.50%               | 16 independent builds, m=256             |
+| HyperLogLog p=10                   | 50,000 distinct                  | +0.38%                 | 4.86%          | 3.25%               | 16 independent builds, m=1024            |
+| HyperLogLog p=12                   | 50,000 distinct                  | +0.12%                 | 2.87%          | 1.62%               | 16 independent builds, m=4096            |
+| HyperLogLog p=14                   | 50,000 distinct                  | +0.99%                 | 2.30%          | 0.81%               | 16 independent builds, m=16384           |
+| CountMinSketch eps=1e-3 delta=0.05 | 267 distinct                     | 0 max overcount        | 0.00% of N     | 0.10% promise       | 2719x3 cells, never undercounts          |
+| CountMinSketch eps=1e-3 delta=0.05 | 1,000,000 distinct, count 1 each | 413 max overcount      | 352 mean       | 1,000 = eps*N       | 2719x3 cells, never undercounts          |
+| TDigest delta=20                   | 1,000,000 values                 | 0.00024 max rank error | 0.00010 median | 0 by construction   | 175 centroids, 2,800 B                   |
+| TDigest delta=100                  | 1,000,000 values                 | 0.00005 max rank error | 0.00003 median | 0 by construction   | 742 centroids, 11,872 B                  |
+| TDigest delta=500                  | 1,000,000 values                 | 0.00003 max rank error | 0.00001 median | 0 by construction   | 3185 centroids, 50,960 B                 |
+| RunningStats mean                  | 1,000,000                        | 3.638e-12              | -              | 0 (exact algorithm) | vs statistics.fmean                      |
+| RunningStats variance              | 1,000,000                        | 1.637e-11              | -              | 0 (exact algorithm) | vs statistics.variance                   |
+| Reservoir inclusion                | n=400, k=40                      | 0.0325 max deviation   | 0.0085 spread  | 0.100 target        | 1200 draws, one shared rng               |
+| WeightedReservoir k=1              | 55 total weight                  | 0.0094 max deviation   | -              | 0.0530 spread       | 2000 draws, exact proportions as n grows |
+| Ewma debias                        | 2,000 samples                    | 6.661e-16              | -              | 0 (algebraic)       | vs the explicit weighted mean            |
+
+14 rows, 49.0 s
+
+## throughput
+
+Median over repetitions of the same loop. The exact baselines are measured in this run, not quoted: a pure-Python sketch loses to a C container on speed, and the reason to use it is the memory suite, not this one. The last row isolates the marginal cost of a sketch on top of line parsing.
+
+| operation                                                  | sketch                       | exact baseline | sketch per op | sketch vs baseline | note                     |
+|------------------------------------------------------------|------------------------------|----------------|---------------|--------------------|--------------------------|
+| HyperLogLog(12).add over n vs set(keys)                    | 590.44 ms (552.6-619.1 ms)   | 20.70 ms       | 2952 ns/op    | 28.5x slower       | median of 5, 200,000 ops |
+| CountMinSketch(2048,4).add over n vs dict counts           | 944.27 ms (932.2-981.7 ms)   | 73.40 ms       | 4721 ns/op    | 12.9x slower       | median of 5, 200,000 ops |
+| TDigest(100).add over n vs sorting the same n values       | 1117.85 ms (952.3-1151.8 ms) | 50.14 ms       | 5589 ns/op    | 22.3x slower       | median of 5, 200,000 ops |
+| Reservoir(50).add over n vs list(keys)                     | 132.43 ms (121.1-140.0 ms)   | 2.33 ms        | 662 ns/op     | 56.9x slower       | median of 5, 200,000 ops |
+| RunningStats.add over n vs sum/sum-of-squares              | 116.69 ms (112.9-134.4 ms)   | 14.69 ms       | 583 ns/op     | 7.9x slower        | median of 5, 200,000 ops |
+| HyperLogLog.add vs set membership                          | 5.33 ms (5.1-5.7 ms)         | 0.13 ms        | 2666 ns/op    | 42.0x slower       | median of 5, 2,000 ops   |
+| CountMinSketch.query vs dict.get                           | 9.49 ms (9.1-10.1 ms)        | 0.14 ms        | 4747 ns/op    | 65.7x slower       | median of 5, 2,000 ops   |
+| TDigest.quantile x1000 vs sorted()[i] x1000, sort excluded | 48.02 ms (44.6-52.6 ms)      | 0.06 ms        | 48025 ns/op   | 759.9x slower      | median of 5, 1,000 ops   |
+| line.split + RunningStats.add vs line.split alone          | 202.74 ms (196.4-209.9 ms)   | 45.51 ms       | 1014 ns/op    | 4.5x slower        | median of 5, 200,000 ops |
+
+9 rows, 17.0 s
+
+## memory
+
+Live CPython size: sys.getsizeof of the container plus the objects it owns. This is not RSS, and the exact baselines are the point of the comparison.
+
+| structure               | live bytes   | what it counted    | scales with  | note                              |
+|-------------------------|--------------|--------------------|--------------|-----------------------------------|
+| HyperLogLog p=12        | 4,201 B      | 1,000,000 distinct | constant     | registers only in memory_usage()  |
+| set of the same keys    | 92,443,538 B | 1,000,000 distinct | grows with n | the honest baseline               |
+| CountMinSketch 2048x4   | 69,800 B     | 1,000,000 mass     | constant     | 8-byte ints, not counters         |
+| dict of the same keys   | 30,758,348 B | 1,000,000 entries  | grows with n | exact, and the comparison         |
+| TDigest delta=100       | 6,640 B      | 371 centroids      | O(delta)     | plus the pending buffer           |
+| list of the same values | 32,448,728 B | 1,000,000 floats   | grows with n | required by sorted()              |
+| Reservoir k=50          | 3,481 B      | 50 items           | constant     | k strings, nothing else           |
+| RunningStats            | 72 B         | 1,000,000 counted  | constant     | five scalars                      |
+| stream of n keys        | -            | 1,000,000          | -            | what both baselines are sized for |
+
+9 rows, 27.3 s
+
+## serialisation
+
+The frame format costs a fixed header plus a CRC32 over everything before it; these are round-trip times, not just encode times.
+
+| structure                          | frame    | encode   | decode   | framing      | note                                   |
+|------------------------------------|----------|----------|----------|--------------|----------------------------------------|
+| HyperLogLog p=14                   | 16,400 B | 0.018 ms | 0.019 ms | 16 B framing | registers copied on write              |
+| CountMinSketch 2719x3              | 65,287 B | 0.091 ms | 0.090 ms | 31 B framing | counters are byteswapped to big-endian |
+| TDigest delta=200 (1191 centroids) | 19,095 B | 0.941 ms | 0.563 ms | 23 B framing | 16 B per centroid                      |
+
+3 rows, 2.5 s
+
+## determinism
+
+The point of blake2b with a fixed key: the same stream has to produce the same bytes in a different process, or a persisted sketch is fiction.
+
+| check                            | first               | second          | verdict     | scale          | note                                                        |
+|----------------------------------|---------------------|-----------------|-------------|----------------|-------------------------------------------------------------|
+| three sketches, two interpreters | 59a0aef9312b...     | 59a0aef9312b... | match       | 2 subprocesses | sha256 over the HLL, Count-Min and t-digest frames together |
+| HyperLogLog insertion order      | 50,864              | 50,864          | equal       | 50,000 keys    | max over ranks is order free                                |
+| Count-Min split merge            | 5000/5000           | -               | equal       | 50,000 keys    | cell sums are associative, hashes are not the issue         |
+| t-digest split merge             | 0.00038 max cdf gap | -               | approximate | 50,000 values  | merging re-compresses, so it is not bit-exact               |
+
+4 rows, 2.1 s
+
+## merge
+
+Shard and combine has to beat holding everything, otherwise it is a curiosity. These are wall times for the whole operation, median of reps.
+
+| operation                             | sketch                       | exact baseline | sketch per op | sketch vs baseline | note                                                |
+|---------------------------------------|------------------------------|----------------|---------------|--------------------|-----------------------------------------------------|
+| 4-shard HyperLogLog merge vs set()    | 607.47 ms (546.6-709.7 ms)   | 18.07 ms       | 3037 ns/op    | 33.6x slower       | median of 5, 200,000 ops                            |
+| 4-shard Count-Min merge vs dict       | 1016.82 ms (950.7-1198.4 ms) | 83.86 ms       | 5084 ns/op    | 12.1x slower       | median of 5, 200,000 ops                            |
+| 4-shard TDigest merge vs sorted()     | 893.14 ms (864.3-971.6 ms)   | 2.12 ms        | 4466 ns/op    | 422.3x slower      | median of 5, 200,000 ops                            |
+| two shards + combine vs one long pass | 115.54 ms (112.1-121.1 ms)   | 116.65 ms      | 578 ns/op     | 1.0x faster        | median of 5, 200,000 ops                            |
+| merge correctness (t-digest)          | 0.00043 rank gap             | -              | -             | 4 shards           | 682 centroids in one pass vs 599 merged, same delta |
+
+5 rows, 16.5 s
+
+## cli
+
+Wall time of the shipped subcommands over a generated CSV, interpreter startup included. Each row is the median of three runs.
+
+| command                                   | median  | spread        | per row     | startup                  | note                                 |
+|-------------------------------------------|---------|---------------|-------------|--------------------------|--------------------------------------|
+| sift stats --column 3 --separator ,       | 923 ms  | 852..926 ms   | 1.75 us/row | incl. 48 ms startup      | median of 3 subprocess runs          |
+| sift quantiles --column 3                 | 4052 ms | 3690..4999 ms | 8.01 us/row | incl. 48 ms startup      | median of 3 subprocess runs          |
+| sift cardinality --column 2               | 2009 ms | 1988..2096 ms | 3.92 us/row | incl. 48 ms startup      | median of 3 subprocess runs          |
+| sift top --column 2                       | 3350 ms | 3220..3636 ms | 6.60 us/row | incl. 48 ms startup      | median of 3 subprocess runs          |
+| sift sample 20                            | 699 ms  | 665..809 ms   | 1.30 us/row | incl. 48 ms startup      | median of 3 subprocess runs          |
+| read the file and sum column 3 in-process | 258 ms  | -             | 0.52 us/row | no sketch, no subprocess | the floor any line reader has to pay |
+
+6 rows, 35.3 s
+
+total 149.8 s, seed 20251118, quick=False
