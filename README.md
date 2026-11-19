@@ -328,8 +328,9 @@ is a test or a measurement, and no fabricated performance. Architecture in
 `.github/workflows/ci.yml` runs the same `unittest discover` across Python
 3.11, 3.12 and 3.13 on ubuntu-latest and windows-latest, then `pip install .`
 and a smoke run of both entry points (`sift --version`, `python -m sift
---help`). All twelve jobs were green on the commit that added the workflow;
-before it existed, every number here came from the Windows runs above.
+--help`) inside each of those six jobs. All six were green on the commit that
+added the workflow and green again on the commit after it; before they existed,
+every number here came from the Windows runs above.
 
 ## Elsewhere in this account
 
