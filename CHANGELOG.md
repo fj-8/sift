@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- A root `LICENSE` file stating both grants, the `MIT OR Apache-2.0` SPDX
+  identifier, and the contribution clause; `[tool.setuptools] license-files` now
+  ships it in the distribution next to the two full texts it points at. The wheel
+  that carried only `LICENSE-MIT` and `LICENSE-APACHE` told a downstream user the
+  two licenses existed but not that they are alternatives. No terms changed.
+
 ### Fixed
 - `-` is stdin on every subcommand. `sift stats -` used to try to open a file
   named `-` and exit 2 with `No such file or directory`.
