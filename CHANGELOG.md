@@ -19,6 +19,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   leaves the workflow pins as the only versions in the repository that can go
   stale.
 
+### Changed
+- `actions/checkout` is pinned to v7 and `actions/setup-python` to v7, both by
+  Dependabot, both merged on the same terms as any other change: the six-job
+  matrix had to be green on the pull request first. `.github/workflows/ci.yml`
+  is the only file either of them touched, and `python -m unittest` output is
+  unchanged, because the workflow is what runs the tests rather than what the
+  package imports.
+
 ### Fixed
 - `-` is stdin on every subcommand. `sift stats -` used to try to open a file
   named `-` and exit 2 with `No such file or directory`.
