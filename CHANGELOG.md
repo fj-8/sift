@@ -12,6 +12,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ships it in the distribution next to the two full texts it points at. The wheel
   that carried only `LICENSE-MIT` and `LICENSE-APACHE` told a downstream user the
   two licenses existed but not that they are alternatives. No terms changed.
+- `.github/ISSUE_TEMPLATE/bug-report.yml` and `.github/dependabot.yml`. The form
+  asks for the estimator, the calls and input, the commands with the `src`-layout
+  `PYTHONPATH` spelled out for Windows as well as POSIX, and `python -VV`; the
+  Dependabot config watches `github-actions` only, since `dependencies = []`
+  leaves the workflow pins as the only versions in the repository that can go
+  stale.
 
 ### Fixed
 - `-` is stdin on every subcommand. `sift stats -` used to try to open a file

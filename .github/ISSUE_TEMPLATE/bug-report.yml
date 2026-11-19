@@ -1,0 +1,77 @@
+name: Something is wrong
+description: An estimate is outside the bound the docs promise, bytes do not round-trip, the CLI answers wrong, or a number in the README does not reproduce
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every error bound, byte count and "never undercounts" in this repository is
+        pinned by a test, so a report that contradicts one of those sentences is
+        either a real bug or a bug in the sentence — both are worth filing. The
+        estimators are deterministic given the same input and the same hash, so a
+        reproduction that includes the data beats a description of it.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - HyperLogLog (cardinality)
+        - Count-Min (frequencies and top-k)
+        - t-digest (quantiles)
+        - Welford (running mean, variance, min, max)
+        - reservoir sampling
+        - to_bytes and from_bytes
+        - the CLI (cardinality, top, quantiles, stats, sample)
+        - a bench number or docs/PERFORMANCE.md
+        - packaging (pyproject, the wheel, the console script)
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: >-
+        The value you got and the sentence or bound it contradicts. For a
+        round-trip, the two lengths; for a quantile, the rank and the estimate.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: >-
+        The calls, the input, and the seed if one was passed. A generator expression
+        is fine; the shortest thing that still fails is what gets fixed.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: What you ran
+      description: On Windows the path is `set PYTHONPATH=src`, not the shell assignment.
+      value: |
+        PYTHONPATH=src python -m unittest discover -s tests -t .
+        PYTHONPATH=src python -m sift --version
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: python -VV
+      description: The floor is 3.11; the interpreter line answers the version and the build.
+      placeholder: 3.12.7 (main, Oct 1 2024, 12:00:00) [GCC 13.2.0]
+    validations:
+      required: true
+  - type: textarea
+    id: baseline
+    attributes:
+      label: Does the same input behave differently on another version
+      description: >-
+        Only if you tried. A difference between 3.11 and 3.13 narrows the search
+        considerably, because the only things this package borrows are in the
+        standard library.
+    validations:
+      required: false
