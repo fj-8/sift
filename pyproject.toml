@@ -48,7 +48,7 @@ Changelog = "https://github.com/fj-8/sift/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-license-files = ["LICENSE-MIT", "LICENSE-APACHE"]
+license-files = ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
