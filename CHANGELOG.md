@@ -77,3 +77,6 @@ Initial public release. Pure standard library, Python 3.11+.
   for the one case where you need to persist the scalars.
 - Benchmarks in the README and `docs/PERFORMANCE.md` are transcribed from a
   real run of `bench/bench.py` on one machine, not quoted from papers.
+
+[Unreleased]: https://github.com/fj-8/sift/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/fj-8/sift/releases/tag/v0.1.0
