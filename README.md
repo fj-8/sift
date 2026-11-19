@@ -334,14 +334,17 @@ every number here came from the Windows runs above.
 
 ## Elsewhere in this account
 
-The same rules applied in two other languages — zero dependencies, and every
+The same rules applied in three other languages — zero dependencies, and every
 number in the README measured in the same checkout:
 
 - [`karg`](https://github.com/fj-8/karg) — dependency-free Rust argument parser
   with typed accessors and errors that name the nearest valid flag.
 - [`bitlane`](https://github.com/fj-8/bitlane) — header-only C++20 compressed
-  bitmap index over `uint32_t` sets, with a versioned, CRC32C-checked wire
+  bitmap index over `uint32_t` sets, with a versioned, FNV-1a-64-checked wire
   format.
+- [`turnstile`](https://github.com/fj-8/turnstile) — bounded MPMC queue over a
+  fixed ring for the JVM: `VarHandle` release/acquire, no locks, no allocation
+  per element, and a README that prints where it loses to `ArrayBlockingQueue`.
 
 ## License
 
